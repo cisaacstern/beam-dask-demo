@@ -14,11 +14,12 @@ def yield_jsonlines(fname: str):
         
 
 if __name__ == "__main__":
-    opts = dict(runner=DaskRunner(), options=PipelineOptions(sys.argv[1:]))
+    tmpdir, pipeline_options = sys.argv[1], sys.argv[2:]
+    opts = dict(runner=DaskRunner(), options=PipelineOptions(pipeline_options))
     with beam.Pipeline(**opts) as p:
         (
             p
-            | beam.Create(glob.glob('data/*.json'))
+            | beam.Create(glob.glob(f'{tmpdir}/*.json'))
             | beam.FlatMap(yield_jsonlines)
             | beam.Filter(lambda record: record['age'] > 30)
             | beam.Filter(lambda record: record['name'][0].startswith('A'))
